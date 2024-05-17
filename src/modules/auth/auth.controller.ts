@@ -3,11 +3,17 @@ import { AuthService } from './auth.service';
 import { Public } from 'src/utils/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { User } from 'src/modules/user/entities/user.entity';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({
+    summary: 'Login',
+    description: 'Login authentication',
+  })
   @Public()
   @Post('login')
   async login(@Body() dto: LoginDto) {

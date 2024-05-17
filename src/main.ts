@@ -11,6 +11,10 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Backend endpoint')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'user-access-token',
+    )
     .setDescription('Backend endpoint ')
     .setVersion('1.0')
     .build();
