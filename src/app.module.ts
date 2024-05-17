@@ -7,6 +7,8 @@ import dataSource, { safeInit } from './data-source/data-source';
 import { BookModule } from './modules/book/book.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './modules/auth/guard/jwt.guard';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
 
 @Module({
   imports: [
@@ -20,6 +22,11 @@ import { JwtGuard } from './modules/auth/guard/jwt.guard';
       useFactory: () => ({
         autoLoadEntities: true,
       }),
+    }),
+    WinstonModule.forRoot({
+      level: 'debug',
+      format: winston.format.json(),
+      transports: [new winston.transports.Console()],
     }),
     ConfigModule.forRoot(),
     UserModule,
