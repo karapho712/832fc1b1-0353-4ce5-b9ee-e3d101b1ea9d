@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserService } from 'src/modules/user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from './dto/login.dto';
+import { omit } from 'lodash';
+import { User } from 'src/modules/user/entities/user.entity';
+import { compare } from 'bcrypt';
 
+const EXPIRE_TIME = 15 * 60 * 1000; // In seconds
+const ACCESS_TOKEN_EXPIRE_TIME = '15m';
+const REFRESH_TOKEN_EXPIRE_TIME = '20m';
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async validateUser(loginDto: LoginDto) {
+    const user = await this.userService.findByEmail(loginDto.email);
+
+    if (user && (await compare(loginDto.password, user.password))) {
+      const rest = omit(user, 'password');
+      return rest;
+    } else {
+      throw new UnauthorizedException();
+    }
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async login(loginDto: LoginDto) {
+    const user = await this.validateUser(loginDto);
+
+    return {
+      user,
+      backendTokens: {
+        accessToken: await this.jwtService.signAsync(user, {
+          expiresIn: ACCESS_TOKEN_EXPIRE_TIME,
+          secret: process.env.jwtSecretKey,
+        }),
+        refreshToken: await this.jwtService.signAsync(user, {
+          expiresIn: REFRESH_TOKEN_EXPIRE_TIME,
+          secret: process.env.jwtRefreshTokenKey,
+        }),
+        expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+      },
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+  async refreshToken(user: User) {
+    const person = await this.userService.findByEmail(user.email);
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return {
+      user: person,
+      accessToken: await this.jwtService.signAsync(user, {
+        expiresIn: ACCESS_TOKEN_EXPIRE_TIME,
+        secret: process.env.jwtSecretKey,
+      }),
+      refreshToken: await this.jwtService.signAsync(user, {
+        expiresIn: REFRESH_TOKEN_EXPIRE_TIME,
+        secret: process.env.jwtRefreshTokenKey,
+      }),
+      expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+    };
   }
 }

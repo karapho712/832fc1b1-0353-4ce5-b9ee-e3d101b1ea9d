@@ -11,8 +11,8 @@ export const dataSourceOptions: DataSourceOptions = {
   // username: 'root',
   //   password: '',
   //   autoLoadEntities: true,
-  // entities: [Book, Member, Borrowing],
-  entities: [],
+  // entities: [User],
+  entities: ['dist/modules/**/*.entity{.ts,.js}'],
   migrations: ['dist/migrations/*{.ts,.js}'],
   synchronize: false,
 };
