@@ -4,6 +4,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import dataSource, { safeInit } from './data-source/data-source';
+import { BookModule } from './modules/book/book.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtGuard } from './modules/auth/guard/jwt.guard';
 
 @Module({
   imports: [
@@ -21,8 +24,14 @@ import dataSource, { safeInit } from './data-source/data-source';
     ConfigModule.forRoot(),
     UserModule,
     AuthModule,
+    BookModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
+  ],
 })
 export class AppModule {}
