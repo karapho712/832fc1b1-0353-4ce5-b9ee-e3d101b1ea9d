@@ -1,4 +1,5 @@
 - To install project run `npm install --legacy-peer-deps`
+- create `.env` file by copy paste `.env copy` file and rename it to `.env`
 - To run project, do `npm run start:dev`
 - Login via `localhost:8000/auth/login` and do `POST` method with body
 
@@ -35,3 +36,4 @@
 - When do Create, update, delete on `/book` you can see the log in terminal
 - To run unit test do `npm run test`
 - You can see migrations file on `src/migrations`
+- You can also see api docs on `localhost:8000/docs`
